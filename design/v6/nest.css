@@ -464,10 +464,12 @@ html.calm *,html.calm *::before,html.calm *::after{transition:none!important;ani
 .gal .gal__clip.pv--on{opacity:1}
 .gal__clip svg,.gal__clip video{display:block;width:100%;height:100%;object-fit:cover}
 .gal__play[hidden]{display:none}
+.gal:has(.gal__play:not([hidden])){cursor:pointer}
 .gal :is(.gal__nav,.gal__play){opacity:0;pointer-events:none}
 .gal--tap :is(.gal__nav,.gal__play),.gal:focus-visible :is(.gal__nav,.gal__play),.gal:has(:focus-visible) :is(.gal__nav,.gal__play){opacity:1;pointer-events:auto}
 @media (hover:hover){.gal:hover :is(.gal__nav,.gal__play){opacity:1;pointer-events:auto}}
 @media (prefers-reduced-motion:no-preference){html:not(.calm) .gal :is(.gal__nav,.gal__play){transition:opacity .2s var(--ease)}}
+.gal:has(>.vflash)>.gal__play{opacity:0}
 .phd .acts{position:relative}
 .m-update{display:none}.is-update .m-update{display:block}.is-update .m-new{display:none}
 .seg .chip[aria-checked=true]{background:var(--t1);color:var(--on-ink);font-weight:500}
