@@ -2,7 +2,7 @@
   "use strict";
   const { works, tiers } = window.NEST;
   const { SampleDetails } = window.Details;
-  const { ic, esc, wb, thai, Follows, History, Paths, face, rankIcon } = window.NestShell;
+  const { ic, esc, wb, thai, History, Paths, face, rankIcon } = window.NestShell;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const DAYS = { today: 0, yesterday: 1, "2 days ago": 2, "3 days ago": 3, "4 days ago": 4, "5 days ago": 5, "6 days ago": 6, "last week": 7, "1 week ago": 8, "2 weeks ago": 14, "3 weeks ago": 21, "last month": 30, "2 months ago": 60 };
@@ -24,10 +24,10 @@
       this.w = w;
       const d = new SampleDetails(w), ups = d.updates(), t = tiers.find((x) => x.id === w.tier);
       const place = tiers.indexOf(t) * 10 + w.place, team = d.team(), links = d.links(), ch = d.contact().filter(([k]) => k !== "phone");
-      const more = this.similar(w).slice(0, isPhone() ? 4 : 10), on = Follows.has(w.id), [bl, bh] = back(), ph = isPhone();
+      const more = this.similar(w).slice(0, isPhone() ? 4 : 10), [bl, bh] = back(), ph = isPhone();
       this.ch = ch;
       document.title = `${w.name} · Hamster Nest`;
-      this.root.innerHTML = `<div class="phead"><div><a class="backl" href="${bh}">${ic("back")}${esc(bl)}</a><span class="pmeta">${esc(w.genre)} / ${w.platforms.map(esc).join(" / ")}</span><div class="wt"><h1>${esc(w.name)}</h1><span class="tag">${esc(w.room)}</span></div><p class="pitch">${esc(w.blurb)}</p><span class="btns"><button type="button" class="btn btn--acc" data-act="follow" aria-pressed="${on}">${ic("follow")}<span>${on ? "Following" : "Follow"}</span></button></span></div>
+      this.root.innerHTML = `<div class="phead"><div><a class="backl" href="${bh}">${ic("back")}${esc(bl)}</a><span class="pmeta">${esc(w.genre)} / ${w.platforms.map(esc).join(" / ")}</span><div class="wt"><h1>${esc(w.name)}</h1><span class="tag">${esc(w.room)}</span></div><p class="pitch">${esc(w.blurb)}</p></div>
         <div class="owner sumbox"><dl><div><dt>Rank</dt><dd>${rankIcon(w.tier, 18)}${t.name} · #${place} of ${works.length}</dd></div><div><dt>Last update</dt><dd>${esc(w.update.when[0].toUpperCase() + w.update.when.slice(1))}</dd></div><div><dt>Made by</dt><dd>${team.map(([n]) => esc(n)).join(", ")}</dd></div><div><dt>Runs on</dt><dd>${w.platforms.map(esc).join(", ")}</dd></div></dl></div></div>
         <div class="watch"><div>
           <div class="galw"><div class="gal" role="region" aria-label="Clip and pictures of ${esc(w.name)}" tabindex="0"><span class="gal__art"></span><button type="button" class="gal__play" aria-pressed="false" aria-label="Play the clip of ${esc(w.name)}" style="border:0;cursor:pointer">${ic("play")}</button><button type="button" class="gal__nav" data-go="-1" style="left:12px;border:0;cursor:pointer" aria-label="Previous picture">${ic("back")}</button><button type="button" class="gal__nav" data-go="1" style="right:12px;border:0;cursor:pointer" aria-label="Next picture">${ic("next")}</button><span class="gal__count"></span></div>
@@ -86,8 +86,7 @@
           return;
         }
         const a = b.dataset.act;
-        if (a === "follow") { const on = Follows.toggle(this.w.id); b.setAttribute("aria-pressed", String(on)); $("span", b).textContent = on ? "Following" : "Follow"; }
-        else if (a === "allups") { $$(".ups li", this.root).forEach((li) => (li.hidden = false)); b.remove(); }
+        if (a === "allups") { $$(".ups li", this.root).forEach((li) => (li.hidden = false)); b.remove(); }
       });
     }
     stop() { if (this.preview) this.preview.stop(); }

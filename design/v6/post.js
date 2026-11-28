@@ -237,7 +237,7 @@
       }
       const base = works.find((x) => x.room === (d.room || "Game")) || works[0];
       const w = { ...base, id: "draft", name: d.name || "Your project's name", maker: ME.name, scribble: "" };
-      body.innerHTML = card(w, 1, { noRank: true, noFollow: true, upd: "Posted just now", href: "#", room: d.room || "Room" });
+      body.innerHTML = card(w, 1, { noRank: true, upd: "Posted just now", href: "#", room: d.room || "Room" });
       const cover = this.media.cover, pic = $(".pc__pic", body);
       if (cover && pic) { const svg = $("svg", pic); if (svg) svg.outerHTML = cover.video ? `<video src="${cover.url}" muted autoplay loop playsinline style="width:100%;height:100%;object-fit:cover"></video>` : `<img src="${cover.url}" alt="" style="width:100%;height:100%;object-fit:cover">`; }
       const link = $(".pc__link", body); if (link) { link.removeAttribute("href"); link.setAttribute("aria-disabled", "true"); }

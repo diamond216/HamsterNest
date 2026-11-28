@@ -20,7 +20,6 @@ window.NestShell = (function () {
     browse: '<rect x="4" y="4" width="7" height="7" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="4" width="7" height="7" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="4" y="13" width="7" height="7" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="13" y="13" width="7" height="7" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/>',
     logs: '<path d="M6 4h9l3 3v13H6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 11h6M9 15h6M9 8h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
     about: '<circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
-    follow: '<path d="M6 19V6a1 1 0 011-1h10a1 1 0 011 1v13l-6-3.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
     home: '<path d="M4 11l8-6 8 6v8a1 1 0 01-1 1h-4v-5h-6v5H5a1 1 0 01-1-1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>',
     search: '<circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
     link: '<path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
@@ -68,24 +67,6 @@ window.NestShell = (function () {
   };
   const wb = (s) => esc(s).replace(s.includes("@") ? /@/ : /([\/.])/g, s.includes("@") ? "@<wbr>" : "$1<wbr>");
   const thai = (root2 = document) => $$(".pc__name,.pc__by,.lc__title,.lc__ex,.sl b,.si span,.wt h1,.pc__more p,.pitch,.tmn", root2).forEach((e) => { if (/[฀-๿]/.test(e.textContent)) e.lang = "th"; });
-
-  const Follows = {
-    KEY: "nest-follows",
-    list() {
-      try { const v = JSON.parse(Store.get(this.KEY)); if (Array.isArray(v)) return v; } catch (e) {}
-      let seed = ["burrow-knights", "bus-ping", "nestboard", "lantern-run", "rain-jar"];
-      try { const f = JSON.parse(Store.get("nest-favs")); if (Array.isArray(f) && f.length) seed = f.map((x) => (Array.isArray(x) ? x[0] : x.id)).filter(Boolean); } catch (e) {}
-      return seed.filter((id) => works.some((w) => w.id === id));
-    },
-    has(id) { return this.list().includes(id); },
-    toggle(id) {
-      const l = this.list(), on = !l.includes(id);
-      Store.set(this.KEY, JSON.stringify(on ? [id, ...l] : l.filter((x) => x !== id)));
-      dispatchEvent(new CustomEvent("nest:follows", { detail: { id, on } }));
-      return on;
-    },
-    isNew(w) { return ["today", "yesterday"].includes(w.update.when); },
-  };
 
   const History = {
     KEY: "nest-history",
@@ -250,10 +231,9 @@ window.NestShell = (function () {
     items() { return this.el ? $$(".am__it", this.el) : []; },
     html(sheet) {
       const u = Session.user, m = Me.get();
-      const n = Follows.list().filter((id) => works.some((w) => w.id === id)).length;
-      const row = (icon, label, href) => `<a class="am__it" role="menuitem" tabindex="-1" href="${href}">${ic(icon)}<span>${label}</span>${icon === "follow" && n ? `<small aria-hidden="true">${n}</small>` : ""}</a>`;
+      const row = (icon, label, href) => `<a class="am__it" role="menuitem" tabindex="-1" href="${href}">${ic(icon)}<span>${label}</span></a>`;
       const who = `<div class="am__who" id="am-who">${avatar(40)}<span><b>${esc(m.name || u.name)}</b><small>@${esc(u.handle)}</small></span></div>`;
-      const items = `${row("user", "Your profile", Paths.page(`profile.html#${u.handle}`))}${row("plus", "Build", Paths.page("post.html"))}${row("follow", "Following", Paths.page(`profile.html#${u.handle}/following`))}${row("gear", "Settings", Paths.page("settings.html"))}<div class="am__sep" role="separator"></div><button class="am__it" role="menuitem" tabindex="-1" type="button" data-am="out">${ic("out")}<span>Log out</span></button>`;
+      const items = `${row("user", "Your profile", Paths.page(`profile.html#${u.handle}`))}${row("plus", "Build", Paths.page("post.html"))}${row("gear", "Settings", Paths.page("settings.html"))}<div class="am__sep" role="separator"></div><button class="am__it" role="menuitem" tabindex="-1" type="button" data-am="out">${ic("out")}<span>Log out</span></button>`;
       return sheet
         ? `<div class="sheet-scrim" data-am="scrim"></div><div class="sheet acct-sheet am" id="acct-menu" role="dialog" aria-modal="true" aria-label="Account menu"><div class="grab" aria-hidden="true"></div>${who}<button type="button" class="x" data-am="close" aria-label="Close">${ic("x")}</button><div class="am__sep" aria-hidden="true"></div><div role="menu" aria-labelledby="am-who">${items}</div></div>`
         : `<div class="acct-menu am" id="acct-menu">${who}<div class="am__sep" aria-hidden="true"></div><div role="menu" aria-labelledby="am-who">${items}</div></div>`;
@@ -386,20 +366,11 @@ window.NestShell = (function () {
     document.addEventListener("click", (e) => {
       if (e.target.closest('#side a[href$="#about"]') && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); showAbout(); }
     });
-    document.addEventListener("click", (e) => {
-      const f = e.target.closest('[data-act="follow"],[data-follow]'); if (!f) return;
-      setTimeout(() => {
-        const on = f.getAttribute("aria-pressed") === "true";
-        f.classList.remove("f-on", "f-off"); void f.offsetWidth; f.classList.add(on ? "f-on" : "f-off");
-        clearTimeout(f._ft); f._ft = setTimeout(() => f.classList.remove("f-on", "f-off"), 600);
-      });
-    });
     document.addEventListener("pointerdown", (e) => press(sideBtn(e.target)));
     document.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") press(sideBtn(e.target)); });
     addEventListener("resize", layout);
     addEventListener("scroll", onScroll, { passive: true });
     addEventListener("nest:session", () => { render(); });
-    addEventListener("nest:follows", () => sideMenu());
     addEventListener("nest:history", () => sideMenu());
     addEventListener("nest:me", () => { Acct.close(); render(); });
     addEventListener("resize", () => { if (Acct.el) Acct.close(); });
@@ -417,9 +388,10 @@ window.NestShell = (function () {
     paintLang(); thai();
   }
 
+  ["nest-follows", "nest-follow-people"].forEach((k) => Store.drop(k));
   try { const l = localStorage.getItem("nest-lang"); if (l === "th") root.lang = "th"; } catch (e) {}
   render(); motion.apply(); wire();
   if (location.hash === "#about") addEventListener("load", () => setTimeout(showAbout, 0), { once: true });
   if (window.NestSession) window.NestSession.search = search;
-  return { I, ic, MARK, rankIcon, SIL, avatar, face, Me, esc, wb, thai, Follows, History, theme, motion, lang, search, Paths, closeDrawer, layout };
+  return { I, ic, MARK, rankIcon, SIL, avatar, face, Me, esc, wb, thai, History, theme, motion, lang, search, Paths, closeDrawer, layout };
 })();

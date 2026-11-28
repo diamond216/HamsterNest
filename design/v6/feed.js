@@ -1,7 +1,7 @@
 window.NestFeed = (function () {
   "use strict";
   const { works, tiers } = window.NEST;
-  const { ic, esc, Follows, thai, Paths, search, rankIcon } = window.NestShell;
+  const { ic, esc, thai, Paths, search, rankIcon } = window.NestShell;
   const { BrowseState, sortWorks } = window.BrowseKit;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -13,26 +13,17 @@ window.NestFeed = (function () {
   const card = (w, i, opts = {}) => {
     const name = opts.name || w.name, rank = opts.noRank ? "new, not ranked yet" : tierName(w.tier);
     const rk = opts.noRank ? "" : `<span class="pc__rk" title="${tierName(w.tier)}">${rankIcon(w.tier, 18)}</span>`;
-    const on = Follows.has(w.id);
-    const fol = opts.noFollow ? "" : `<button type="button" class="pc__follow" data-follow="${w.id}" aria-pressed="${on}" aria-label="Follow ${esc(name)}">${ic("follow")}<span class="fl">${on ? "Following" : "Follow"}</span></button>`;
     const href = opts.href || Paths.page(`project.html#${w.id}`);
     const did = `pcd-${w.id}-${++seq}`;
     const vtag = w.video ? `<span class="pc__vtag">${ic("play")}Video</span>` : "";
     return `<div class="pc" data-id="${w.id}"><span class="pc__hl" aria-hidden="true"><span class="sp"></span><span class="pc__more"></span></span><a class="pc__link" href="${href}" aria-describedby="${did}"><span class="pc__pic" aria-hidden="true">${window.Art.draw(w, (opts.frame ?? i) % 7)}${vtag}</span>
       <span class="pc__row"><h3 class="pc__name">${esc(name)}<span class="vh">, ${rank}</span></h3>${rk}<span class="tag">${esc(opts.room || w.room)}</span></span>
-      <span class="pc__by">${esc(opts.maker || w.maker)}</span><span class="pc__upd">${esc(opts.upd || `Updated ${w.update.when}`)}</span></a>${fol}<span class="vh" id="${did}">${esc(w.blurb)}</span></div>`;
+      <span class="pc__by">${esc(opts.maker || w.maker)}</span><span class="pc__upd">${esc(opts.upd || `Updated ${w.update.when}`)}</span></a><span class="vh" id="${did}">${esc(w.blurb)}</span></div>`;
   };
   let seq = 0;
 
   function wireCards(grid, from) {
     grid.addEventListener("click", (e) => {
-      const f = e.target.closest("[data-follow]");
-      if (f) {
-        e.preventDefault();
-        const on = Follows.toggle(f.dataset.follow);
-        $$(`[data-follow="${f.dataset.follow}"]`).forEach((b) => { b.setAttribute("aria-pressed", String(on)); const l = $(".fl", b); if (l) l.textContent = on ? "Following" : "Follow"; });
-        return;
-      }
       if (e.target.closest(".pc__link") && from) { try { sessionStorage.setItem("nest-from", from); } catch (x) {} }
     });
     const still = () => document.documentElement.classList.contains("calm") || matchMedia("(prefers-reduced-motion: reduce)").matches;
