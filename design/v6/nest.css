@@ -300,6 +300,7 @@ body.m-drawer .side{display:block;top:0;z-index:60;padding-top:8px;background:va
 .sh .n{font:400 13px/1 var(--mono);color:var(--t3);font-family:var(--f)}
 .tag{flex:none;display:inline-flex;align-items:center;height:22px;padding:0 10px;background:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,0) 45%),var(--tape);color:var(--tape-ink);font:500 12px/1 var(--f);clip-path:polygon(4px 0,calc(100% - 3px) 0,100% 18%,calc(100% - 4px) 34%,100% 52%,calc(100% - 3px) 70%,100% 86%,calc(100% - 2px) 100%,3px 100%,0 84%,4px 66%,0 48%,3px 30%,0 14%);transform:rotate(-2.5deg);font-family:var(--f)}
 .thm .ico{width:20px;height:20px}
+[data-theme=dark] .thm__sun,:root:not([data-theme=dark]) .thm__moon{display:none}
 .thm[aria-pressed=true]{background:var(--raised2)}
 .sortd{position:relative;margin-left:auto;align-self:center}
 .sortd__btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 10px 0 12px;border:1px solid transparent;border-radius:8px;background:var(--raised);font:500 14px/1 var(--f);color:var(--t1);cursor:pointer;white-space:nowrap;transition:background-color .15s var(--ease)}
