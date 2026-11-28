@@ -45,6 +45,7 @@ window.NestI18n = (function () {
     "What's new, and what should people try first?": "มีอะไรใหม่ และควรลองอะไรก่อน", "Preview": "ตัวอย่าง", "Close the guide": "ปิดคู่มือ",
     "Add a name to post": "ใส่ชื่อก่อนโพสต์", "Add a title to post": "ใส่หัวข้อก่อนโพสต์", "Pick the project to update": "เลือกโปรเจกต์ที่จะอัปเดต", "Pick the project": "เลือกโปรเจกต์",
     "A title for the update": "หัวข้อของอัปเดต", "Sign in to post your project": "เข้าสู่ระบบเพื่อโพสต์โปรเจกต์", "Sign in": "เข้าสู่ระบบ",
+    "All ranks": "ทุกอันดับ",
   };
   const MON = { Jan: "ม.ค.", Feb: "ก.พ.", Mar: "มี.ค.", Apr: "เม.ย.", May: "พ.ค.", Jun: "มิ.ย.", Jul: "ก.ค.", Aug: "ส.ค.", Sep: "ก.ย.", Sept: "ก.ย.", Oct: "ต.ค.", Nov: "พ.ย.", Dec: "ธ.ค." };
   const WHEN = /^(today|yesterday|last week|last month|(\d+) (day|week|month)s? ago)$/i;

@@ -118,7 +118,7 @@ window.NestFeed = (function () {
       const ph = isPhone();
       chipsEl.innerHTML = `<button type="button" class="chip ${ph ? "chip--fbtn" : "chip--filter"}" data-c="filters" aria-expanded="${panel}" aria-controls="fpanel">${ic("filter")}Filters${state.active ? `<span class="cc">${state.active}</span>` : ""}</button>${ph ? "" : '<span class="chip-sep" aria-hidden="true"></span>'}
         ${["All", ...ROOMS].map((r) => `<button type="button" class="chip" data-room="${r}" aria-pressed="${state.tab === r}">${r === "All" ? "All categories" : r}</button>`).join("")}
-        ${ph || cfg.noRank ? "" : `<span class="chip-sep rk" aria-hidden="true"></span>${tiers.map((t) => `<button type="button" class="chip rk" data-rank="${t.id}" aria-pressed="${state.ranks.has(t.id)}">${rankIcon(t.id)}${t.name}</button>`).join("")}`}`;
+        ${ph || cfg.noRank ? "" : `<span class="chip-sep rk" aria-hidden="true"></span><button type="button" class="chip rk" data-rank="all" aria-pressed="${!state.ranks.size}">All ranks</button>${tiers.map((t) => `<button type="button" class="chip rk" data-rank="${t.id}" aria-pressed="${state.ranks.has(t.id)}">${rankIcon(t.id)}${t.name}</button>`).join("")}`}`;
     }
     const cnt = (key, test, ignore) => state.count(test, ignore);
     const top = (arr) => { const m = {}; arr.forEach((k) => (m[k] = (m[k] || 0) + 1)); return Object.entries(m).sort((x, y) => y[1] - x[1]).slice(0, 6).map(([k]) => k); };
@@ -188,7 +188,8 @@ window.NestFeed = (function () {
       const b = e.target.closest("button"); if (!b) return;
       if (b.dataset.c === "filters") return setPanel(!panel);
       if (b.dataset.room) state.setTab(b.dataset.room);
-      if (b.dataset.rank) state.toggle("ranks", b.dataset.rank);
+      if (b.dataset.rank === "all") { if (state.ranks.size) state.set((x) => x.ranks.clear()); }
+      else if (b.dataset.rank) state.toggle("ranks", b.dataset.rank);
     });
     host.addEventListener("click", (e) => {
       if (e.target.closest(".sortd__btn")) return setSort(!sortOpen);
