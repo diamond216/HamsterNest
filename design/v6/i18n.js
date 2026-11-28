@@ -2,7 +2,7 @@ window.NestI18n = (function () {
   "use strict";
   const root = document.documentElement;
   const D = {
-    "Skip to content": "ข้ามไปยังเนื้อหา", "Build": "สร้าง", "Create": "สร้าง", "Browse": "สำรวจ", "Dev logs": "บันทึกการพัฒนา", "View your profile": "ดูโปรไฟล์ของคุณ",
+    "Skip to content": "ข้ามไปยังเนื้อหา", "Build": "สร้าง", "Create": "สร้าง", "See more": "ดูเพิ่มเติม", "Browse": "สำรวจ", "Dev logs": "บันทึกการพัฒนา", "View your profile": "ดูโปรไฟล์ของคุณ",
     "Log out": "ออกจากระบบ", "Log in": "เข้าสู่ระบบ", "Sign up": "สมัครสมาชิก", "Home": "หน้าแรก", "About": "เกี่ยวกับ", "Following": "กำลังติดตาม",
     "Follow": "ติดตาม", "new": "ใหม่", "update": "อัปเดต", "Rooms": "ห้อง", "Dark theme": "ธีมมืด", "Your profile": "โปรไฟล์ของคุณ",
     "Follow a project to see it here": "ติดตามโปรเจกต์เพื่อดูที่นี่", "Game": "เกม", "Web": "เว็บ", "Idea": "ไอเดีย", "All projects": "ทุกโปรเจกต์", "All categories": "ทุกหมวดหมู่","All": "ทั้งหมด",
@@ -74,6 +74,7 @@ window.NestI18n = (function () {
     [/^Contact (.+)$/, (m) => `ติดต่อ ${m[1]}`],
     [/^About (.+)$/, (m) => `เกี่ยวกับ ${m[1]}`],
     [/^See the project: (.+)$/, (m) => `ดูโปรเจกต์: ${m[1]}`],
+    [/^See more: (.+)$/, (m) => `ดูเพิ่มเติม: ${m[1]}`],
     [/^(Facebook|LINE|Phone|Instagram): (.+)$/, (m) => `${D[m[1]] || m[1]}: ${m[2]}`],
     [/^Clip and pictures of (.+)$/, (m) => `คลิปและภาพของ ${m[1]}`],
     [/^(Play|Pause) the clip of (.+)$/, (m) => `${m[1] === "Play" ? "เล่น" : "หยุด"}คลิปของ ${m[2]}`],

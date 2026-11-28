@@ -22,6 +22,7 @@ window.Details = (function () {
     static AWARDS = [["Best of the school fair", "Science fair, Aug 2026"], ["People's pick", "Open house, Sep 2026"], ["Best newcomer", "Hamster Hub demo day, Oct 2026"]];
     constructor(w) { this.w = w; }
     links() {
+      if (this.w.links) return this.w.links;
       const id = this.w.id, more = [["GitHub", `https://github.com/hamster-nest-sample/${id}`], ["Website", `https://${id}.hamster-nest-sample.example`], null][seed(id, 3)];
       return [["itch.io", `https://hamster-nest-sample.itch.io/${id}`], ...(more ? [more] : [])];
     }
@@ -46,6 +47,7 @@ window.Details = (function () {
       ];
     }
     team() {
+      if (this.w.team) return this.w.team;
       const others = [...new Set(works.filter((x) => x.room === this.w.room && x.maker !== this.w.maker).map((x) => x.maker))];
       const size = 2 + seed(this.w.id, 3), start = seed(this.w.name, others.length);
       const names = [this.w.maker, ...Array.from({ length: size - 1 }, (_, i) => others[(start + i * 3) % others.length])];

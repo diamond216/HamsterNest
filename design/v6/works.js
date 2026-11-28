@@ -17,7 +17,7 @@ window.NEST = (function () {
       ["WheelSense", "IoT", "Mind", "A soil probe that texts you before your plants get thirsty.", "soil probe, 2 x AA"],
       ["NestBoard", "Web", "Tonkla", "The class noticeboard the whole school now checks before lunch."],
       ["Sunflower Bank", "Idea", "Phoom", "Twelve friends put in a little each month, and one gets the pot.", "12 friends, one pot"],
-      ["Seed Dash", "Game", "Fah", "Run, jump, and plant a forest before the sun goes down."],
+      ["RE//SLASH", "Game", "Phoom.x", "Fast first-person hack-and-slash: parry everything, go Slash Mode with the katana, keep your momentum."],
       ["AquaNode", "IoT", "Bank", "Keeps an eye on the pond so the fish don't have to.", "pond sensor"],
       ["Kernel Docs", "Web", "Earth", "Notes for the computer club, written by the people who got stuck first."],
       ["Moonwheel", "Game", "Ploy", "A slow night-time puzzle about turning the moon one notch at a time."],
@@ -82,7 +82,7 @@ window.NEST = (function () {
     Idea: ["Fintech", "Logistics", "Community"],
   };
   const GENRE = {
-    "Burrow Knights": "Co-op", "Seed Dash": "Casual", "Moonwheel": "Puzzle", "Tunnel Tales": "Roguelike", "Cheek Pouch": "Casual",
+    "Burrow Knights": "Co-op", "RE//SLASH": "Action", "Moonwheel": "Puzzle", "Tunnel Tales": "Roguelike", "Cheek Pouch": "Casual",
     "Pixel Pals": "Casual", "Lantern Run": "Roguelike", "Kite Wars": "Co-op", "Night Market": "Casual", "Frog Hop": "Casual",
     "Star Catch": "Casual", "Block Drop": "Puzzle", "Cloud Hopper": "Casual", "Paper Planes": "Casual", "Snail Race": "Co-op",
     "WheelSense": "Smart farm", "AquaNode": "Water", "Coop Watch": "Smart farm", "Bus Ping": "Wearable", "Fan Brain": "Smart home",
@@ -113,10 +113,11 @@ window.NEST = (function () {
 
   const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const VIDEOS = {};
+  const REAL = { "re-slash": { team: [["Phoom.x", ""], ["PetePeachPeat", ""], ["Dnsw", ""]], links: [["itch.io", "https://phoomx.itch.io/reslash"]] } };
   const works = [];
   for (const t of TIERS) {
     ROWS[t.id].forEach(([name, room, maker, blurb, scribble], i) =>
-      works.push({ posted: new Date(Date.UTC(2026, 10, 28) - ((works.length * 67 + name.length * 13) % 360) * 864e5).toISOString().slice(0, 10), favs: (works.length * 41 + name.length * 97) % 600 + 3, update: { what: UPDATES[room][(name.length * 3 + i) % UPDATES[room].length], when: AGO[(i + t.id.length) % AGO.length] }, platforms: PLATFORMS[room][(name.length + i) % PLATFORMS[room].length], id: slug(name), name, room, genre: GENRE[name], maker, blurb, scribble, tier: t.id, place: i + 1, frames: 7, video: VIDEOS[slug(name)] || null }));
+      works.push({ posted: new Date(Date.UTC(2026, 10, 28) - ((works.length * 67 + name.length * 13) % 360) * 864e5).toISOString().slice(0, 10), favs: (works.length * 41 + name.length * 97) % 600 + 3, update: { what: UPDATES[room][(name.length * 3 + i) % UPDATES[room].length], when: AGO[(i + t.id.length) % AGO.length] }, platforms: PLATFORMS[room][(name.length + i) % PLATFORMS[room].length], id: slug(name), name, room, genre: GENRE[name], maker, blurb, scribble, tier: t.id, place: i + 1, frames: 7, video: VIDEOS[slug(name)] || null, ...REAL[slug(name)] }));
   }
   // The hero shows the best of each room from the top tier.
   const hero = ["burrow-knights", "wheelsense", "nestboard", "sunflower-bank"];
