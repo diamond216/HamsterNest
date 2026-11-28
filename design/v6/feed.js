@@ -154,7 +154,7 @@ window.NestFeed = (function () {
       const b = e.target.closest("button"); if (!b) return;
       if (b.dataset.room) state.setTab(b.dataset.room);
       if (b.dataset.rank === "all") { if (state.ranks.size) state.set((x) => x.ranks.clear()); }
-      else if (b.dataset.rank) state.toggle("ranks", b.dataset.rank);
+      else if (b.dataset.rank && !(state.ranks.size === 1 && state.ranks.has(b.dataset.rank))) state.onlyRank(b.dataset.rank);
     });
     host.addEventListener("click", (e) => {
       if (e.target.closest(".sortd__btn")) return setSort(!sortOpen);
