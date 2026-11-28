@@ -1,7 +1,7 @@
 window.NestFeed = (function () {
   "use strict";
   const { works, tiers } = window.NEST;
-  const { ic, esc, thai, Paths, search, rankIcon } = window.NestShell;
+  const { ic, esc, thai, Paths, search, rankIcon, Back } = window.NestShell;
   const { BrowseState, sortWorks } = window.BrowseKit;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -204,7 +204,30 @@ window.NestFeed = (function () {
     let wasPhone = isPhone();
     addEventListener("resize", () => { if (isPhone() !== wasPhone) { wasPhone = isPhone(); paint(); } });
     addEventListener("nest:lang", () => paint());
+    const KEY = `nest-feed:${location.pathname}`;
+    let back = null;
+    try { if (Back.came) back = JSON.parse(sessionStorage.getItem(KEY)); else sessionStorage.removeItem(KEY); } catch (e) { back = null; }
+    if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+    if (back) {
+      if (back.tab === "All" || ROOMS.includes(back.tab)) state.tab = back.tab;
+      if (!cfg.noRank && Array.isArray(back.ranks)) { state.ranks.clear(); back.ranks.filter((r) => tiers.some((t) => t.id === r)).forEach((r) => state.ranks.add(r)); }
+      if (!cfg.items && SORTS.some(([v]) => v === back.sort)) state.sort = back.sort;
+      if (back.shown > shown) shown = back.shown;
+    }
+    addEventListener("pagehide", () => {
+      try { sessionStorage.setItem(KEY, JSON.stringify({ shown, y: scrollY, tab: state.tab, ranks: [...state.ranks], sort: state.sort })); } catch (e) {}
+    });
+    addEventListener("pageshow", (e) => { if (e.persisted) hv.hide(); });
     chips(); paint();
+    if (back && back.y > 0) {
+      const y = back.y; let moved = false;
+      const mark = () => { moved = true; };
+      ["wheel", "touchstart", "keydown"].forEach((t) => addEventListener(t, mark, { once: true, passive: true }));
+      scrollTo(0, y);
+      const again = () => { if (!moved && Math.abs(scrollY - y) > 2) scrollTo(0, y); };
+      requestAnimationFrame(again);
+      if (document.readyState !== "complete") addEventListener("load", again, { once: true });
+    }
     return { state, paint };
   }
 

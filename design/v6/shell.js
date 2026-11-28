@@ -6,8 +6,11 @@ window.NestShell = (function () {
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const body = document.body, root = document.documentElement;
+  const cameBack = (() => { try { const n = performance.getEntriesByType("navigation")[0]; return !!n && n.type === "back_forward"; } catch (e) { return false; } })();
   (() => {
-    const main = document.getElementById("main"); if (!main) return;
+    const main = document.getElementById("main");
+    if (cameBack) root.classList.remove("ld");
+    if (!main || cameBack) return;
     root.classList.add("ld"); main.setAttribute("aria-busy", "true");
     const done = () => setTimeout(() => { root.classList.remove("ld"); main.removeAttribute("aria-busy"); }, Math.max(0, 600 - performance.now()));
     if (document.readyState === "loading") addEventListener("DOMContentLoaded", done, { once: true }); else done();
@@ -69,6 +72,7 @@ window.NestShell = (function () {
   const thai = (root2 = document) => $$(".pc__name,.pc__by,.lc__title,.lc__ex,.sl b,.si span,.wt h1,.pc__more p,.pitch,.tmn", root2).forEach((e) => { if (/[฀-๿]/.test(e.textContent)) e.lang = "th"; });
 
   const Back = {
+    came: cameBack,
     prev() { try { const u = new URL(document.referrer); return u.origin === location.origin && history.length > 1 ? u : null; } catch (e) { return null; } },
     label() { const u = Back.prev(); if (!u) return ""; const p = u.pathname; return /\/hero\/(index\.html)?$/.test(p) ? "Back to Home" : /\/browse\.html$/.test(p) ? "Back to Browse" : /\/devlogs\.html$/.test(p) ? "Back to Dev logs" : "Back"; },
   };
