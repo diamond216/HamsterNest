@@ -16,7 +16,7 @@ window.NestFeed = (function () {
     const href = opts.href || Paths.page(`project.html#${w.id}`);
     const did = `pcd-${w.id}-${++seq}`;
     const vtag = w.video ? `<span class="pc__vtag">${ic("play")}Video</span>` : "";
-    return `<div class="pc" data-id="${w.id}"><span class="pc__hl" aria-hidden="true"></span><a class="pc__link" href="${href}" aria-describedby="${did}"><span class="pc__pic" aria-hidden="true">${window.Art.draw(w, (opts.frame ?? i) % 7)}${vtag}<span class="pc__ov"></span></span>
+    return `<div class="pc" data-id="${w.id}"><span class="pc__hl" aria-hidden="true"></span><a class="pc__link" href="${href}" aria-describedby="${did}"><span class="pc__pic" aria-hidden="true">${window.Art.draw(w, (opts.frame ?? i) % 7)}${vtag}</span>
       <span class="pc__row"><h3 class="pc__name">${esc(name)}<span class="vh">, ${rank}</span></h3>${rk}<span class="tag">${esc(opts.room || w.room)}</span></span>
       <span class="pc__by">${esc(opts.maker || w.maker)}</span><span class="pc__upd">${esc(opts.upd || `Updated ${w.update.when}`)}</span></a><span class="vh" id="${did}">${esc(w.blurb)}</span></div>`;
   };
@@ -28,17 +28,17 @@ window.NestFeed = (function () {
     });
     const still = () => document.documentElement.classList.contains("calm") || matchMedia("(prefers-reduced-motion: reduce)").matches;
     const rich = () => fine.matches && innerWidth >= 600;
-    let cur = null, how = "", t1 = 0, t2 = 0, vid = null;
+    let cur = null, how = "", t1 = 0, vid = null, drag = null;
     const stopVid = () => {
       clearTimeout(t1);
       if (vid) { vid.pause(); vid.removeAttribute("src"); vid.load(); vid.remove(); vid = null; }
       if (cur) { cur.classList.remove("v-play"); const pr = $(".pc__prog", cur); if (pr) pr.remove(); }
     };
     const shut = () => {
-      clearTimeout(t2); stopVid();
+      stopVid();
       if (!cur) return;
       cur.classList.remove("s-open");
-      $(".pc__ov", cur).innerHTML = "";
+      $(".pc__pic", cur).style.transform = "";
     };
     const hide = () => { shut(); if (cur) cur.classList.remove("s-hl"); cur = null; how = ""; };
     const startVid = (c, w) => {
@@ -50,31 +50,50 @@ window.NestFeed = (function () {
       const v = vid;
       const tick = () => {
         if (v !== vid) return;
-        const i = $(".pc__prog i", pic); if (i && v.duration) i.style.transform = `scaleX(${Math.min(1, v.currentTime / v.duration)})`;
+        const pr = $(".pc__prog", pic); if (pr && v.duration) pr.style.setProperty("--p", Math.min(1, v.currentTime / v.duration));
         requestAnimationFrame(tick);
       };
       v.addEventListener("playing", () => {
         if (v !== vid) return;
         v.classList.add("on"); c.classList.add("v-play");
-        if (!$(".pc__prog", pic)) pic.insertAdjacentHTML("beforeend", '<span class="pc__prog" aria-hidden="true"><i></i></span>');
+        if (!$(".pc__prog", pic)) pic.insertAdjacentHTML("beforeend", '<span class="pc__prog" aria-hidden="true"><i></i><b></b></span>');
         tick();
       }, { once: true });
       v.play().catch(() => {});
     };
-    const open = (c, w) => {
-      const ov = $(".pc__ov", c);
-      ov.innerHTML = `<span class="bl">${esc(w.blurb)}</span><span class="fx">${esc(w.genre)} · Runs on ${esc(w.platforms.join(", "))}</span><span class="lu"><i></i>Latest update</span><span class="ut">${esc(w.update.what)}</span>`;
-      thai(ov);
-      c.classList.add("s-open");
+    const edge = () => Math.max(0, ...[".tb", ".tabs2", ".chips"].map((q) => { const e = document.querySelector(q); return e && e.offsetParent !== null ? e.getBoundingClientRect().bottom : 0; }));
+    const place = (c) => {
+      const pic = $(".pc__pic", c), r = c.getBoundingClientRect(), W = pic.offsetWidth, H = pic.offsetHeight;
+      const s = Math.min(1.2, Math.max(1.08, 1 + 48 / W)), gx = W * (s - 1) / 2, gy = H * (s - 1) / 2;
+      const vl = r.left - gx, vr = r.left + W + gx, vt = r.top - gy, vb = r.top + H + gy, vw = document.documentElement.clientWidth;
+      let dx = 0, dy = 0;
+      if (vl < 8) dx = 8 - vl; else if (vr > vw - 8) dx = vw - 8 - vr;
+      if (vb > innerHeight - 8) dy = innerHeight - 8 - vb;
+      dy = Math.max(dy, edge() + 6 - vt);
+      pic.style.transform = `translate(${Math.round(dx)}px,${Math.round(dy)}px) scale(${s.toFixed(3)})`;
     };
+    const open = (c) => { c.classList.add("s-open"); place(c); };
+    const live = () => cur && vid && cur.classList.contains("v-play") ? vid : null;
+    const flash = (pic, paused) => {
+      const old = $(".vflash", pic); if (old) old.remove();
+      if (still()) return;
+      pic.insertAdjacentHTML("beforeend", `<span class="vflash" aria-hidden="true">${ic(paused ? "pause" : "play")}</span>`);
+      const f = $(".vflash", pic); f.addEventListener("animationend", () => f.remove(), { once: true });
+    };
+    const toggle = () => {
+      const v = live(); if (!v) return;
+      if (v.paused || v.ended) v.play().catch(() => {}); else v.pause();
+      flash($(".pc__pic", cur), v.paused);
+    };
+    const seekTo = (v, t) => { if (v.duration) v.currentTime = Math.max(0, Math.min(v.duration - 0.05, t)); };
+    const seekAt = (pr, x) => { const v = live(), b = pr.getBoundingClientRect(); if (v && b.width) seekTo(v, (x - b.left) / b.width * v.duration); };
     const start = (c, mode) => {
       if (c === cur) return;
       hide();
       const w = works.find((x) => x.id === c.dataset.id); if (!w) return;
       cur = c; how = mode;
       if (mode === "mouse") c.classList.add("s-hl");
-      t1 = setTimeout(() => { if (cur === c) startVid(c, w); }, 300);
-      t2 = setTimeout(() => { if (cur === c) open(c, w); }, 500);
+      t1 = setTimeout(() => { if (cur === c) { open(c); startVid(c, w); } }, 300);
     };
     grid.addEventListener("pointerover", (e) => {
       if (e.pointerType !== "mouse" || !rich()) return;
@@ -86,6 +105,25 @@ window.NestFeed = (function () {
       if (!l || !rich() || !l.matches(":focus-visible")) { if (cur && !cur.contains(e.target)) hide(); return; }
       start(l.closest(".pc"), "key");
     });
+    grid.addEventListener("pointerdown", (e) => {
+      const pr = e.target.closest(".pc__prog"); if (!pr || !cur || !cur.contains(pr) || !live() || e.button !== 0) return;
+      e.preventDefault(); drag = pr; pr.classList.add("drag"); pr.setPointerCapture(e.pointerId); seekAt(pr, e.clientX);
+    });
+    grid.addEventListener("pointermove", (e) => { if (drag) seekAt(drag, e.clientX); });
+    const endDrag = () => { if (drag) { drag.classList.remove("drag"); drag = null; } };
+    grid.addEventListener("pointerup", endDrag);
+    grid.addEventListener("pointercancel", endDrag);
+    grid.addEventListener("click", (e) => {
+      const pic = e.target.closest(".pc__pic"); if (!pic || !cur || !cur.contains(pic) || !live()) return;
+      e.preventDefault();
+      if (!e.target.closest(".pc__prog")) toggle();
+    });
+    grid.addEventListener("keydown", (e) => {
+      const l = e.target.closest(".pc__link"), v = live(); if (!l || !v || !cur.contains(l) || e.altKey || e.ctrlKey || e.metaKey) return;
+      const k = e.key.toLowerCase();
+      if (k === " " || k === "k") { e.preventDefault(); toggle(); }
+      else if (k === "arrowleft" || k === "arrowright") { e.preventDefault(); seekTo(v, v.currentTime + (k === "arrowleft" ? -5 : 5)); }
+    });
     grid.addEventListener("focusout", (e) => { if (cur && how === "key" && !cur.contains(e.relatedTarget)) hide(); });
     let px = -1, py = -1, sf = 0;
     addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") { px = e.clientX; py = e.clientY; } }, { passive: true });
@@ -93,10 +131,14 @@ window.NestFeed = (function () {
     const under = () => {
       sf = 0;
       const el = px < 0 || !rich() ? null : document.elementFromPoint(px, py), c = el && el.closest(".pc");
-      if (c && grid.contains(c) && !c.classList.contains("pc--sk")) start(c, "mouse");
+      if (c && grid.contains(c) && !c.classList.contains("pc--sk")) { start(c, "mouse"); if (c === cur && c.classList.contains("s-open")) place(c); }
       else if (how === "mouse") hide();
     };
-    addEventListener("scroll", () => { if (how !== "key" && !sf) sf = requestAnimationFrame(under); }, { passive: true });
+    addEventListener("scroll", () => {
+      if (drag) return;
+      if (how !== "key") { if (!sf) sf = requestAnimationFrame(under); }
+      else if (cur && cur.classList.contains("s-open")) place(cur);
+    }, { passive: true });
     addEventListener("resize", hide);
     addEventListener("keydown", (e) => { if (e.key === "Escape" && cur) { shut(); } });
     addEventListener("nest:motion", (e) => { if (!e.detail.on) stopVid(); });
