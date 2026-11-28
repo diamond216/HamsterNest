@@ -77,6 +77,13 @@
         thumbs.forEach((t, k) => (k === this.at ? t.setAttribute("aria-current", "true") : t.removeAttribute("aria-current")));
       };
       gal.addEventListener("click", (e) => { const n = e.target.closest("[data-go]"); if (n) go(this.at + +n.dataset.go); if (e.target.closest(".gal__play")) { const on = play.getAttribute("aria-pressed") !== "true"; userPaused = !on; setPlay(on); } });
+      let tapT = 0, reveal = false;
+      gal.addEventListener("pointerdown", (e) => {
+        if (e.pointerType === "mouse") return;
+        reveal = !gal.classList.contains("gal--tap");
+        gal.classList.add("gal--tap"); clearTimeout(tapT); tapT = setTimeout(() => gal.classList.remove("gal--tap"), 3000);
+      });
+      gal.addEventListener("click", (e) => { if (reveal && e.target.closest(".gal__nav, .gal__play")) { e.preventDefault(); e.stopImmediatePropagation(); } reveal = false; }, true);
       gal.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") { e.preventDefault(); go(this.at + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); go(this.at - 1); } });
       thumbs.forEach((t, i) => { t.addEventListener("click", () => go(i)); t.addEventListener("focus", () => t.scrollIntoView({ block: "nearest", inline: "nearest" })); });
       go(0);
