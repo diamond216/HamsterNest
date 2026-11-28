@@ -34,6 +34,7 @@ window.NestFeed = (function () {
       if (vid) { vid.pause(); vid.removeAttribute("src"); vid.load(); vid.remove(); vid = null; }
       if (cur) { cur.classList.remove("v-play"); const pr = $(".pc__prog", cur); if (pr) pr.remove(); }
     };
+    const edge = () => Math.max(0, ...[".tb", ".tabs2", ".chips"].map((q) => { const e = document.querySelector(q); return e && e.offsetParent !== null ? e.getBoundingClientRect().bottom : 0; }));
     const shut = () => {
       clearTimeout(t2); stopVid();
       if (!cur) return;
@@ -62,8 +63,11 @@ window.NestFeed = (function () {
       thai(more);
       c.style.setProperty("--ch", `${c.offsetHeight + 16}px`);
       c.classList.add("s-open");
-      const r = c.getBoundingClientRect();
-      c.classList.toggle("s-up", r.bottom + more.offsetHeight + 8 > innerHeight);
+      place(c);
+    };
+    const place = (c) => {
+      const r = c.getBoundingClientRect(), h = $(".pc__more", c).offsetHeight + 8;
+      c.classList.toggle("s-up", r.bottom + h > innerHeight && r.top - h >= edge() + 6);
     };
     const start = (c, mode) => {
       if (c === cur) return;
@@ -86,7 +90,7 @@ window.NestFeed = (function () {
     });
     grid.addEventListener("focusout", (e) => { if (cur && how === "key" && !cur.contains(e.relatedTarget)) hide(); });
     grid.addEventListener("click", (e) => { const m = e.target.closest(".pc__more"); if (m) { const l = $(".pc__link", m.closest(".pc")); if (l) l.click(); } });
-    addEventListener("scroll", () => { if (how === "mouse") hide(); }, { passive: true });
+    addEventListener("scroll", () => { if (how === "mouse") hide(); else if (cur && cur.classList.contains("s-open")) place(cur); }, { passive: true });
     addEventListener("resize", hide);
     addEventListener("keydown", (e) => { if (e.key === "Escape" && cur) { shut(); } });
     addEventListener("nest:motion", (e) => { if (!e.detail.on) stopVid(); });
@@ -104,6 +108,8 @@ window.NestFeed = (function () {
       <div class="${cfg.listClass || "grid"}"></div><div class="more" hidden aria-hidden="true"></div>`;
     const chipsEl = $(".chips", host), grid = $("." + (cfg.listClass || "grid"), host), more = $(".more", host);
     const hv = wireCards(grid, from);
+    const pad = () => { const t = parseFloat(getComputedStyle(chipsEl).top); document.documentElement.style.scrollPaddingTop = `${(isNaN(t) ? 0 : t) + chipsEl.offsetHeight + 12}px`; };
+    pad(); new ResizeObserver(pad).observe(chipsEl); addEventListener("resize", pad);
 
     function chips() {
       chipsEl.innerHTML = `<div class="chips__g" role="group" aria-label="Categories">${["All", ...ROOMS].map((r) => `<button type="button" class="chip" data-room="${r}" aria-pressed="${state.tab === r}">${r === "All" ? "All categories" : r}</button>`).join("")}</div>${cfg.noRank ? "" : `<div class="chips__g chips__g--rk" role="group" aria-label="Ranks"><button type="button" class="chip" data-rank="all" aria-pressed="${!state.ranks.size}">All ranks</button>${tiers.map((t) => `<button type="button" class="chip" data-rank="${t.id}" aria-pressed="${state.ranks.has(t.id)}">${rankIcon(t.id)}${t.name}</button>`).join("")}</div>`}`;
