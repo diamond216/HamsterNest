@@ -16,7 +16,7 @@ window.NestFeed = (function () {
     const href = opts.href || Paths.page(`project.html#${w.id}`);
     const did = `pcd-${w.id}-${++seq}`;
     const vtag = w.video ? `<span class="pc__vtag">${ic("play")}Video</span>` : "";
-    return `<div class="pc" data-id="${w.id}"><span class="pc__hl" aria-hidden="true"></span><a class="pc__link" href="${href}" aria-describedby="${did}"><span class="pc__pic" aria-hidden="true">${window.Art.draw(w, (opts.frame ?? i) % 7)}${vtag}</span>
+    return `<div class="pc" data-id="${w.id}"><span class="pc__hl" aria-hidden="true"><span class="sp"></span><span class="pc__more"></span></span><a class="pc__link" href="${href}" aria-describedby="${did}"><span class="pc__pic" aria-hidden="true">${window.Art.draw(w, (opts.frame ?? i) % 7)}${vtag}</span>
       <span class="pc__row"><h3 class="pc__name">${esc(name)}<span class="vh">, ${rank}</span></h3>${rk}<span class="tag">${esc(opts.room || w.room)}</span></span>
       <span class="pc__by">${esc(opts.maker || w.maker)}</span><span class="pc__upd">${esc(opts.upd || `Updated ${w.update.when}`)}</span></a><span class="vh" id="${did}">${esc(w.blurb)}</span></div>`;
   };
@@ -28,17 +28,17 @@ window.NestFeed = (function () {
     });
     const still = () => document.documentElement.classList.contains("calm") || matchMedia("(prefers-reduced-motion: reduce)").matches;
     const rich = () => fine.matches && innerWidth >= 600;
-    let cur = null, how = "", t1 = 0, vid = null, drag = null;
+    let cur = null, how = "", t1 = 0, t2 = 0, vid = null, drag = null;
     const stopVid = () => {
       clearTimeout(t1);
       if (vid) { vid.pause(); vid.removeAttribute("src"); vid.load(); vid.remove(); vid = null; }
       if (cur) { cur.classList.remove("v-play"); const pr = $(".pc__prog", cur); if (pr) pr.remove(); }
     };
     const shut = () => {
-      stopVid();
+      clearTimeout(t2); stopVid();
       if (!cur) return;
-      cur.classList.remove("s-open");
-      $(".pc__pic", cur).style.transform = "";
+      cur.classList.remove("s-open", "s-up");
+      $(".pc__more", cur).innerHTML = "";
     };
     const hide = () => { shut(); if (cur) cur.classList.remove("s-hl"); cur = null; how = ""; };
     const startVid = (c, w) => {
@@ -63,16 +63,17 @@ window.NestFeed = (function () {
     };
     const edge = () => Math.max(0, ...[".tb", ".tabs2", ".chips"].map((q) => { const e = document.querySelector(q); return e && e.offsetParent !== null ? e.getBoundingClientRect().bottom : 0; }));
     const place = (c) => {
-      const pic = $(".pc__pic", c), r = c.getBoundingClientRect(), W = pic.offsetWidth, H = pic.offsetHeight;
-      const s = Math.min(1.2, Math.max(1.08, 1 + 48 / W)), gx = W * (s - 1) / 2, gy = H * (s - 1) / 2;
-      const vl = r.left - gx, vr = r.left + W + gx, vt = r.top - gy, vb = r.top + H + gy, vw = document.documentElement.clientWidth;
-      let dx = 0, dy = 0;
-      if (vl < 8) dx = 8 - vl; else if (vr > vw - 8) dx = vw - 8 - vr;
-      if (vb > innerHeight - 8) dy = innerHeight - 8 - vb;
-      dy = Math.max(dy, edge() + 6 - vt);
-      pic.style.transform = `translate(${Math.round(dx)}px,${Math.round(dy)}px) scale(${s.toFixed(3)})`;
+      const r = c.getBoundingClientRect(), h = $(".pc__more", c).offsetHeight + 8;
+      c.classList.toggle("s-up", r.bottom + h > innerHeight && r.top - h >= edge() + 6);
     };
-    const open = (c) => { c.classList.add("s-open"); place(c); };
+    const open = (c, w) => {
+      const more = $(".pc__more", c);
+      more.innerHTML = `<p class="bl">${esc(w.blurb)}</p><p class="fx">${esc(w.genre)} · Runs on ${esc(w.platforms.join(", "))}</p><p class="lu"><i></i>Latest update</p><p class="ut">${esc(w.update.what)}</p>`;
+      thai(more);
+      c.style.setProperty("--ch", `${c.offsetHeight + 16}px`);
+      c.classList.add("s-open");
+      place(c);
+    };
     const live = () => cur && vid && cur.classList.contains("v-play") ? vid : null;
     const flash = (pic, paused) => {
       const old = $(".vflash", pic); if (old) old.remove();
@@ -93,7 +94,8 @@ window.NestFeed = (function () {
       const w = works.find((x) => x.id === c.dataset.id); if (!w) return;
       cur = c; how = mode;
       if (mode === "mouse") c.classList.add("s-hl");
-      t1 = setTimeout(() => { if (cur === c) { open(c); startVid(c, w); } }, 300);
+      t1 = setTimeout(() => { if (cur === c) startVid(c, w); }, 300);
+      t2 = setTimeout(() => { if (cur === c) open(c, w); }, 500);
     };
     grid.addEventListener("pointerover", (e) => {
       if (e.pointerType !== "mouse" || !rich()) return;
@@ -113,6 +115,7 @@ window.NestFeed = (function () {
     const endDrag = () => { if (drag) { drag.classList.remove("drag"); drag = null; } };
     grid.addEventListener("pointerup", endDrag);
     grid.addEventListener("pointercancel", endDrag);
+    grid.addEventListener("click", (e) => { const m = e.target.closest(".pc__more"); if (m) { const l = $(".pc__link", m.closest(".pc")); if (l) l.click(); } });
     grid.addEventListener("click", (e) => {
       const pic = e.target.closest(".pc__pic"); if (!pic || !cur || !cur.contains(pic) || !live()) return;
       e.preventDefault();
