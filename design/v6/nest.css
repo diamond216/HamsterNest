@@ -506,7 +506,6 @@ html.calm *,html.calm *::before,html.calm *::after{transition:none!important;ani
 #side .press{outline:2px solid var(--acc);outline-offset:2px}
 @keyframes press-ring{0%{outline-color:var(--acc);outline-offset:0}60%{outline-color:var(--acc);outline-offset:3px}100%{outline-color:transparent;outline-offset:5px}}
 @media (prefers-reduced-motion:no-preference){html:not(.calm) #side .press{animation:press-ring .5s var(--ease) forwards}}
-.chips{background:color-mix(in srgb,var(--page) 80%,transparent);-webkit-backdrop-filter:blur(12px) saturate(1.2);backdrop-filter:blur(12px) saturate(1.2)}
 .phead .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .cbox .crow:first-of-type{border-top:0}
 .tm--av{justify-content:flex-start;gap:12px;padding:4px 0}
