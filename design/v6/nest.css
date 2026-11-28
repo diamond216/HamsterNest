@@ -533,6 +533,8 @@ html.calm *,html.calm *::before,html.calm *::after{transition:none!important;ani
 .pc.s-open .pc__vtag{opacity:0}
 @keyframes pc-in{from{opacity:0}}
 .pc:has(.pc__link:focus-visible) .pc__hl{outline:2px solid var(--acc);outline-offset:0}
+.pc.s-hl .pc__name,.pc:has(.pc__link:focus-visible) .pc__name,.lc:focus-visible .lc__title{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+@media (hover:hover) and (pointer:fine){.pc:hover .pc__name,.lc:hover .lc__title{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}}
 .pc__vtag{position:absolute;right:8px;bottom:8px;display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px 0 6px;border-radius:4px;background:var(--vplate);color:#fff;font:500 12px/1 var(--f);transition:opacity .15s var(--ease)}
 .pc__vtag svg{width:12px;height:12px}
 .pc__vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .15s var(--ease)}
