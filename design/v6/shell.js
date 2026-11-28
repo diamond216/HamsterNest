@@ -27,7 +27,6 @@ window.NestShell = (function () {
     play: '<path d="M8 5v14l11-7z" fill="currentColor"/>',
     back: '<path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
     next: '<path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>',
-    filter: '<path d="M4 7h16M7 12h10M10 17h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
     pause: '<path d="M8 6h3v12H8zM13 6h3v12h-3z" fill="currentColor"/>',
     plus: '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>',
     copy: '<rect x="8" y="8" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M16 8V6a1 1 0 00-1-1H6a1 1 0 00-1 1v9a1 1 0 001 1h2" fill="none" stroke="currentColor" stroke-width="1.7"/>',

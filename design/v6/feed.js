@@ -107,46 +107,17 @@ window.NestFeed = (function () {
     const state = new BrowseState(cfg.items ? { items, of, text: cfg.text } : {});
     const from = cfg.from || "Browse";
     const per = () => (cfg.per ? cfg.per() : isPhone() ? 8 : 16);
-    let shown = per(), panel = false;
-    host.innerHTML = `<div class="chips" role="toolbar" aria-label="Rooms and filters"></div><div class="fp-host"></div>
+    let shown = per();
+    host.innerHTML = `<div class="chips" role="toolbar" aria-label="Categories and ranks"></div>
       <div class="sh"><${cfg.h} class="sh__t"></${cfg.h}>${cfg.h === "h1" ? '<h2 class="vh">Projects</h2>' : ""}<span class="sort-host"></span></div>
       <div class="${cfg.listClass || "grid"}"></div><div class="more" hidden aria-hidden="true"></div>`;
-    const chipsEl = $(".chips", host), fpHost = $(".fp-host", host), grid = $("." + (cfg.listClass || "grid"), host), more = $(".more", host);
+    const chipsEl = $(".chips", host), grid = $("." + (cfg.listClass || "grid"), host), more = $(".more", host);
     const hv = wireCards(grid, from);
 
     function chips() {
-      const ph = isPhone();
-      chipsEl.innerHTML = `<button type="button" class="chip ${ph ? "chip--fbtn" : "chip--filter"}" data-c="filters" aria-expanded="${panel}" aria-controls="fpanel">${ic("filter")}Filters${state.active ? `<span class="cc">${state.active}</span>` : ""}</button>${ph ? "" : '<span class="chip-sep" aria-hidden="true"></span>'}
-        ${["All", ...ROOMS].map((r) => `<button type="button" class="chip" data-room="${r}" aria-pressed="${state.tab === r}">${r === "All" ? "All categories" : r}</button>`).join("")}
-        ${ph || cfg.noRank ? "" : `<span class="chip-sep rk" aria-hidden="true"></span><button type="button" class="chip rk" data-rank="all" aria-pressed="${!state.ranks.size}">All ranks</button>${tiers.map((t) => `<button type="button" class="chip rk" data-rank="${t.id}" aria-pressed="${state.ranks.has(t.id)}">${rankIcon(t.id)}${t.name}</button>`).join("")}`}`;
+      chipsEl.innerHTML = `${["All", ...ROOMS].map((r) => `<button type="button" class="chip" data-room="${r}" aria-pressed="${state.tab === r}">${r === "All" ? "All categories" : r}</button>`).join("")}
+        ${cfg.noRank ? "" : `<span class="chip-sep rk" aria-hidden="true"></span><button type="button" class="chip rk" data-rank="all" aria-pressed="${!state.ranks.size}">All ranks</button>${tiers.map((t) => `<button type="button" class="chip rk" data-rank="${t.id}" aria-pressed="${state.ranks.has(t.id)}">${rankIcon(t.id)}${t.name}</button>`).join("")}`}`;
     }
-    const cnt = (key, test, ignore) => state.count(test, ignore);
-    const top = (arr) => { const m = {}; arr.forEach((k) => (m[k] = (m[k] || 0) + 1)); return Object.entries(m).sort((x, y) => y[1] - x[1]).slice(0, 6).map(([k]) => k); };
-    function panelHTML() {
-      const g = (h, set, rows) => `<div><h3>${h}</h3>${rows.map(([v, label, n]) => `<label class="ck"><input type="checkbox" data-set="${set}" value="${esc(v)}"${state[set].has(v) ? " checked" : ""}><span>${esc(label)}</span><small>${n}</small></label>`).join("")}</div>`;
-      const total = items.filter((x) => state.matches(x)).length;
-      return `<section class="fpanel" id="fpanel" role="region" aria-label="Filters"><div class="fp__cols">
-        ${cfg.noRank ? "" : g("Rank", "ranks", tiers.map((t) => [t.id, t.name, cnt("ranks", (w) => w.tier === t.id, "ranks")]))}
-        ${g("Room", "rooms", ROOMS.map((r) => [r, r, cnt("rooms", (w) => w.room === r, "rooms")]))}
-        ${g("Genre", "genres", top(works.map((w) => w.genre)).map((x) => [x, x, cnt("genres", (w) => w.genre === x, "genres")]))}
-        ${g("Runs on", "plats", top(works.flatMap((w) => w.platforms)).map((x) => [x, x, cnt("plats", (w) => w.platforms.includes(x), "plats")]))}
-        </div><div class="fp__bar"><button type="button" class="btn btn--ghost" data-c="clear">Clear all</button><button type="button" class="btn btn--ink" data-c="show">Show ${total} ${total === 1 ? noun[0] : noun[1]}</button></div></section>`;
-    }
-    function paintPanel() {
-      $$(".sheet,.sheet-scrim").forEach((e) => e.remove());
-      fpHost.innerHTML = "";
-      if (!panel) return;
-      if (isPhone()) {
-        document.body.insertAdjacentHTML("beforeend", `<div class="sheet-scrim" data-c="close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Filters"><div class="grab"></div>${panelHTML().replace('class="fpanel"', 'class="fpanel" style="display:block;border:0;padding:0;margin:0"').replace('class="fp__cols"', 'class="fp__cols" style="grid-template-columns:1fr 1fr;gap:16px"')}</div>`);
-        const sh = $(".sheet"); wirePanel(sh); $(".sheet-scrim").addEventListener("click", () => setPanel(false));
-        const f = $("input", sh); if (f) f.focus();
-      } else { fpHost.innerHTML = panelHTML(); wirePanel(fpHost); }
-    }
-    function wirePanel(root) {
-      root.addEventListener("change", (e) => { const i = e.target.closest("input[data-set]"); if (i) state.toggle(i.dataset.set, i.value); });
-      root.addEventListener("click", (e) => { const b = e.target.closest("[data-c]"); if (!b) return; if (b.dataset.c === "clear") state.clear(); if (b.dataset.c === "show") setPanel(false); });
-    }
-    function setPanel(on) { panel = on; chips(); paintPanel(); if (!on) { const b = $('[data-c="filters"]', chipsEl); if (b) b.focus(); } }
 
     const SORTS = [["new", "Newest"], ["old", "Oldest"], ["pop", "Popular"]], sid = `sortd-${++seq}`;
     let sortOpen = false;
@@ -181,12 +152,10 @@ window.NestFeed = (function () {
       more.hidden = list.length <= shown;
       total = list.length; grid.removeAttribute("aria-busy");
       thai(grid);
-      if (panel && !isPhone()) { fpHost.innerHTML = panelHTML(); wirePanel(fpHost); }
     }
 
     chipsEl.addEventListener("click", (e) => {
       const b = e.target.closest("button"); if (!b) return;
-      if (b.dataset.c === "filters") return setPanel(!panel);
       if (b.dataset.room) state.setTab(b.dataset.room);
       if (b.dataset.rank === "all") { if (state.ranks.size) state.set((x) => x.ranks.clear()); }
       else if (b.dataset.rank) state.toggle("ranks", b.dataset.rank);
@@ -237,7 +206,7 @@ window.NestFeed = (function () {
     const room = P.get("room") || ((location.hash.match(/^#browse-(\w+)$/) || [])[1] || "");
     const R = ROOMS.find((r) => r.toLowerCase() === room.toLowerCase()); if (R) state.tab = R;
     let wasPhone = isPhone();
-    addEventListener("resize", () => { if (isPhone() !== wasPhone) { wasPhone = isPhone(); chips(); paintPanel(); paint(); } });
+    addEventListener("resize", () => { if (isPhone() !== wasPhone) { wasPhone = isPhone(); paint(); } });
     addEventListener("nest:lang", () => paint());
     chips(); paint();
     return { state, paint };
