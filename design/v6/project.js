@@ -2,7 +2,7 @@
   "use strict";
   const { works, tiers } = window.NEST;
   const { SampleDetails } = window.Details;
-  const { ic, esc, wb, thai, History, Paths, face, rankIcon } = window.NestShell;
+  const { ic, esc, wb, thai, History, Back, Paths, face, rankIcon } = window.NestShell;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const DAYS = { today: 0, yesterday: 1, "2 days ago": 2, "3 days ago": 3, "4 days ago": 4, "5 days ago": 5, "6 days ago": 6, "last week": 7, "1 week ago": 8, "2 weeks ago": 14, "3 weeks ago": 21, "last month": 30, "2 months ago": 60 };
@@ -10,10 +10,10 @@
   const dday = (when) => { if (!(when in DAYS)) return ""; const d = new Date(); d.setDate(d.getDate() - DAYS[when]); return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }); };
   const back = () => {
     let f = ""; try { f = sessionStorage.getItem("nest-from") || ""; } catch (e) {}
-    if (f === "Home") return ["Back to Home", Paths.home()];
-    if (f === "Browse") return ["Back to Browse", Paths.page("browse.html")];
-    if (f === "Dev logs") return ["Back to Dev logs", Paths.page("devlogs.html")];
-    return ["Back", Paths.page("browse.html")];
+    const via = Back.label();
+    if (f === "Home") return [via || "Back to Home", Paths.home()];
+    if (f === "Dev logs") return [via || "Back to Dev logs", Paths.page("devlogs.html")];
+    return [via || (f === "Browse" ? "Back to Browse" : "Back"), Paths.page("browse.html")];
   };
   const FIG = [0, 2, 3, 6];
   const slides = () => [{ clip: true, frame: 0 }, ...[1, 2, 3, 4].map((f) => ({ clip: false, frame: f }))];

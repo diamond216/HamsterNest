@@ -68,6 +68,10 @@ window.NestShell = (function () {
   const wb = (s) => esc(s).replace(s.includes("@") ? /@/ : /([\/.])/g, s.includes("@") ? "@<wbr>" : "$1<wbr>");
   const thai = (root2 = document) => $$(".pc__name,.pc__by,.lc__title,.lc__ex,.sl b,.si span,.wt h1,.pc__more p,.pitch,.tmn", root2).forEach((e) => { if (/[฀-๿]/.test(e.textContent)) e.lang = "th"; });
 
+  const Back = {
+    prev() { try { const u = new URL(document.referrer); return u.origin === location.origin && history.length > 1 ? u : null; } catch (e) { return null; } },
+    label() { const u = Back.prev(); if (!u) return ""; const p = u.pathname; return /\/hero\/(index\.html)?$/.test(p) ? "Back to Home" : /\/browse\.html$/.test(p) ? "Back to Browse" : /\/devlogs\.html$/.test(p) ? "Back to Dev logs" : "Back"; },
+  };
   const History = {
     KEY: "nest-history",
     list() {
@@ -371,6 +375,11 @@ window.NestShell = (function () {
     addEventListener("resize", layout);
     addEventListener("scroll", onScroll, { passive: true });
     addEventListener("nest:session", () => { render(); });
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest && e.target.closest("a.backl");
+      if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !Back.prev()) return;
+      e.preventDefault(); history.back();
+    });
     addEventListener("nest:history", () => sideMenu());
     addEventListener("nest:me", () => { Acct.close(); render(); });
     addEventListener("resize", () => { if (Acct.el) Acct.close(); });
@@ -393,5 +402,5 @@ window.NestShell = (function () {
   render(); motion.apply(); wire();
   if (location.hash === "#about") addEventListener("load", () => setTimeout(showAbout, 0), { once: true });
   if (window.NestSession) window.NestSession.search = search;
-  return { I, ic, MARK, rankIcon, SIL, avatar, face, Me, esc, wb, thai, History, theme, motion, lang, search, Paths, closeDrawer, layout };
+  return { I, ic, MARK, rankIcon, SIL, avatar, face, Me, esc, wb, thai, History, Back, theme, motion, lang, search, Paths, closeDrawer, layout };
 })();
