@@ -82,7 +82,16 @@ window.NestFeed = (function () {
       start(l.closest(".pc"), "key");
     });
     grid.addEventListener("focusout", (e) => { if (cur && how === "key" && !cur.contains(e.relatedTarget)) hide(); });
-    addEventListener("scroll", () => { if (how === "mouse") hide(); }, { passive: true });
+    let px = -1, py = -1, sf = 0;
+    addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") { px = e.clientX; py = e.clientY; } }, { passive: true });
+    document.addEventListener("mouseout", (e) => { if (!e.relatedTarget) px = py = -1; });
+    const under = () => {
+      sf = 0;
+      const el = px < 0 || !rich() ? null : document.elementFromPoint(px, py), c = el && el.closest(".pc");
+      if (c && grid.contains(c) && !c.classList.contains("pc--sk")) start(c, "mouse");
+      else if (how === "mouse") hide();
+    };
+    addEventListener("scroll", () => { if (how !== "key" && !sf) sf = requestAnimationFrame(under); }, { passive: true });
     addEventListener("resize", hide);
     addEventListener("keydown", (e) => { if (e.key === "Escape" && cur) { shut(); } });
     addEventListener("nest:motion", (e) => { if (!e.detail.on) stopVid(); });
