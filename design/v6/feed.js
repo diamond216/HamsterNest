@@ -106,8 +106,7 @@ window.NestFeed = (function () {
     const hv = wireCards(grid, from);
 
     function chips() {
-      chipsEl.innerHTML = `${["All", ...ROOMS].map((r) => `<button type="button" class="chip" data-room="${r}" aria-pressed="${state.tab === r}">${r === "All" ? "All categories" : r}</button>`).join("")}
-        ${cfg.noRank ? "" : `<span class="chip-sep rk" aria-hidden="true"></span><button type="button" class="chip rk" data-rank="all" aria-pressed="${!state.ranks.size}">All ranks</button>${tiers.map((t) => `<button type="button" class="chip rk" data-rank="${t.id}" aria-pressed="${state.ranks.has(t.id)}">${rankIcon(t.id)}${t.name}</button>`).join("")}`}`;
+      chipsEl.innerHTML = `<div class="chips__g" role="group" aria-label="Categories">${["All", ...ROOMS].map((r) => `<button type="button" class="chip" data-room="${r}" aria-pressed="${state.tab === r}">${r === "All" ? "All categories" : r}</button>`).join("")}</div>${cfg.noRank ? "" : `<div class="chips__g chips__g--rk" role="group" aria-label="Ranks"><button type="button" class="chip" data-rank="all" aria-pressed="${!state.ranks.size}">All ranks</button>${tiers.map((t) => `<button type="button" class="chip" data-rank="${t.id}" aria-pressed="${state.ranks.has(t.id)}">${rankIcon(t.id)}${t.name}</button>`).join("")}</div>`}`;
     }
 
     const SORTS = [["new", "Newest"], ["old", "Oldest"], ["pop", "Popular"]], sid = `sortd-${++seq}`;
