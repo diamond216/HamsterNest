@@ -37,6 +37,7 @@ window.NestShell = (function () {
     x: '<path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
     user: '<circle cx="12" cy="9" r="3.8" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M5 19.5c1.2-3.4 3.9-5 7-5s5.8 1.6 7 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>',
     gear: GEAR,
+    history: '<path d="M4.5 12a7.5 7.5 0 102.2-5.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M6.5 3.5v3.4h3.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 8v4.2l2.8 1.8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
     out: '<path d="M14 5H6v14h8M10 12h10M17 9l3 3-3 3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>',
   };
   const ic = (k, cls = "ico") => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${I[k]}</svg>`;
@@ -84,6 +85,20 @@ window.NestShell = (function () {
       return on;
     },
     isNew(w) { return ["today", "yesterday"].includes(w.update.when); },
+  };
+
+  const History = {
+    KEY: "nest-history",
+    list() {
+      try { const v = JSON.parse(Store.get(this.KEY)); if (Array.isArray(v)) return v.filter((id) => works.some((w) => w.id === id)); } catch (e) {}
+      return [];
+    },
+    add(id) {
+      if (!works.some((w) => w.id === id)) return;
+      if (this.list()[0] === id) return;
+      Store.set(this.KEY, JSON.stringify([id, ...this.list().filter((x) => x !== id)].slice(0, 20)));
+      dispatchEvent(new CustomEvent("nest:history", { detail: { id } }));
+    },
   };
 
   const darkMQ = matchMedia("(prefers-color-scheme: dark)");
@@ -151,17 +166,16 @@ window.NestShell = (function () {
     const side = $("#side"); if (!side) return;
     const cur = { home: "home", browse: "browse", devlogs: "logs" }[page] || "";
     const signed = Session.signedIn, u = Session.user;
-    const fol = Follows.list().map((id) => works.find((w) => w.id === id)).filter(Boolean);
+    const seen = History.list().map((id) => works.find((w) => w.id === id)).filter(Boolean);
     const si = (k, label, href) => `<a class="si" href="${href}"${cur === k ? ' aria-current="page"' : ""}>${ic(k)}<span>${label}</span></a>`;
     const rooms = ["Game", "IoT", "Web", "Idea"];
     side.innerHTML = `
       <div class="drawer-head"><button type="button" class="ibtn" data-act="menu-close" aria-label="Close menu">${ic("menu")}</button><span class="mark">${MARK}</span></div>
       ${signed ? `<div class="dacct"><div class="who"><a href="${Paths.page(`profile.html#${u.handle}`)}">${avatar(40)}<span><b>${esc(Me.get().name || u.name)}</b><small>View your profile</small></span></a><button type="button" class="btn btn--line" data-act="logout">Log out</button></div><a class="btn btn--line post" href="${Paths.page("post.html")}">${ic("plus")}Build</a><hr></div>` : ""}
       ${si("home", "Home", Paths.home())}${si("browse", "Browse", Paths.page("browse.html"))}${si("logs", "Dev logs", Paths.page("devlogs.html"))}
-      <div class="mini-only"><hr>${si("follow", "Following", Paths.page(`profile.html#${u.handle}/following`))}</div>
-      <div class="full-only"><hr><h4>Following</h4>
-        ${fol.length ? fol.slice(0, 5).map((w) => `<a class="si" href="${Paths.page(`project.html#${w.id}`)}"><span class="thumb" aria-hidden="true">${window.Art ? window.Art.draw(w) : ""}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.name)}</span>${Follows.isNew(w) ? '<small class="nw"><span class="vh">, </span>new<span class="vh"> update</span></small>' : ""}</a>`).join("") : `<p class="side__foot" style="margin-top:0">Follow a project to see it here</p>`}
-        <a class="si" href="${Paths.page(`profile.html#${u.handle}/following`)}">${ic("follow")}<span>All followed (${fol.length})</span></a>
+      <div class="mini-only"><hr><a class="si" href="#side-hist" data-act="history">${ic("history")}<span>Browsing history</span></a></div>
+      <div class="full-only"><hr><h4 id="side-hist" tabindex="-1">Browsing history</h4>
+        ${seen.length ? seen.slice(0, 5).map((w) => `<a class="si" href="${Paths.page(`project.html#${w.id}`)}"><span class="thumb" aria-hidden="true">${window.Art ? window.Art.draw(w) : ""}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(w.name)}</span></a>`).join("") : `<p class="side__foot" style="margin-top:0">No projects viewed yet</p>`}
         <hr><h4>Rooms</h4>
         ${rooms.map((r) => `<a class="si" href="${Paths.page(`browse.html?room=${r}`)}"><span>${r}</span><small>${works.filter((w) => w.room === r).length}</small></a>`).join("")}
         <div class="drawer-extra"><hr><div style="display:flex;gap:10px;align-items:center;padding:4px 12px">${langGroup()}</div><div class="drow"><span id="thm-l">Dark theme</span><button type="button" class="sw" data-sw="theme" role="switch" aria-checked="${theme.dark}" aria-labelledby="thm-l"><i></i></button></div>${signed ? "" : `<div style="display:flex;gap:8px;padding:12px"><a class="btn btn--line" href="#" data-in style="flex:1">Log in</a><a class="btn btn--acc" href="#" data-in style="flex:1">Sign up</a></div>`}</div>
@@ -174,6 +188,12 @@ window.NestShell = (function () {
     if (mode === "mini") { expanded = true; layout(); dispatchEvent(new Event("resize")); }
     else if (mode !== "full" && !body.classList.contains("m-drawer")) openDrawer();
     sf.scrollIntoView({ behavior: smooth, block: "end" }); sf.focus({ preventScroll: true });
+  }
+
+  function showHistory() {
+    const h = $("#side-hist"); if (!h) return;
+    if (mode === "mini") { expanded = true; layout(); dispatchEvent(new Event("resize")); }
+    h.scrollIntoView({ behavior: motion.on ? "smooth" : "auto", block: "nearest" }); h.focus({ preventScroll: true });
   }
 
   function tabs() {
@@ -339,6 +359,7 @@ window.NestShell = (function () {
       else if (a === "search-close") closeSearch();
       else if (a === "search-clear") { search.input.value = ""; search.paint(); search.input.dispatchEvent(new Event("input", { bubbles: true })); if (search.alt) search.alt.focus(); }
       else if (a === "acct") Acct.toggle(t);
+      else if (a === "history") { e.preventDefault(); showHistory(); }
       else if (a === "logout") { Session.signOut(); toast("Logged out"); }
     });
     addEventListener("keydown", (e) => {
@@ -379,6 +400,7 @@ window.NestShell = (function () {
     addEventListener("scroll", onScroll, { passive: true });
     addEventListener("nest:session", () => { render(); });
     addEventListener("nest:follows", () => sideMenu());
+    addEventListener("nest:history", () => sideMenu());
     addEventListener("nest:me", () => { Acct.close(); render(); });
     addEventListener("resize", () => { if (Acct.el) Acct.close(); });
     addEventListener("storage", (e) => {
@@ -399,5 +421,5 @@ window.NestShell = (function () {
   render(); motion.apply(); wire();
   if (location.hash === "#about") addEventListener("load", () => setTimeout(showAbout, 0), { once: true });
   if (window.NestSession) window.NestSession.search = search;
-  return { I, ic, MARK, rankIcon, SIL, avatar, face, Me, esc, wb, thai, Follows, theme, motion, lang, search, Paths, closeDrawer, layout };
+  return { I, ic, MARK, rankIcon, SIL, avatar, face, Me, esc, wb, thai, Follows, History, theme, motion, lang, search, Paths, closeDrawer, layout };
 })();

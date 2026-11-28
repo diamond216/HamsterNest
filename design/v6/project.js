@@ -2,7 +2,7 @@
   "use strict";
   const { works, tiers } = window.NEST;
   const { SampleDetails } = window.Details;
-  const { ic, esc, wb, thai, Follows, Paths, face, rankIcon } = window.NestShell;
+  const { ic, esc, wb, thai, Follows, History, Paths, face, rankIcon } = window.NestShell;
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const DAYS = { today: 0, yesterday: 1, "2 days ago": 2, "3 days ago": 3, "4 days ago": 4, "5 days ago": 5, "6 days ago": 6, "last week": 7, "1 week ago": 8, "2 weeks ago": 14, "3 weeks ago": 21, "last month": 30, "2 months ago": 60 };
@@ -97,7 +97,7 @@
   page.wire();
   const show = () => {
     const [id, part] = decodeURIComponent(location.hash.slice(1)).split("&"), w = works.find((x) => x.id === id) || works[0];
-    page.stop(); page.render(w);
+    page.stop(); page.render(w); History.add(w.id);
     const ups = part === "updates" && $("#updates");
     scrollTo({ top: ups ? ups.getBoundingClientRect().top + scrollY - 72 : 0, behavior: "auto" });
   };
