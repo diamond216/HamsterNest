@@ -5,7 +5,7 @@ window.NestI18n = (function () {
     "Skip to content": "ข้ามไปยังเนื้อหา", "Build": "สร้าง", "Browse": "สำรวจ", "Dev logs": "บันทึกการพัฒนา", "View your profile": "ดูโปรไฟล์ของคุณ",
     "Log out": "ออกจากระบบ", "Log in": "เข้าสู่ระบบ", "Sign up": "สมัครสมาชิก", "Home": "หน้าแรก", "About": "เกี่ยวกับ", "Following": "กำลังติดตาม",
     "Follow": "ติดตาม", "new": "ใหม่", "update": "อัปเดต", "Rooms": "ห้อง", "Dark theme": "ธีมมืด", "Your profile": "โปรไฟล์ของคุณ",
-    "Follow a project to see it here": "ติดตามโปรเจกต์เพื่อดูที่นี่", "Game": "เกม", "Web": "เว็บ", "Idea": "ไอเดีย", "All projects": "ทุกโปรเจกต์", "All": "ทั้งหมด",
+    "Follow a project to see it here": "ติดตามโปรเจกต์เพื่อดูที่นี่", "Game": "เกม", "Web": "เว็บ", "Idea": "ไอเดีย", "All projects": "ทุกโปรเจกต์", "All categories": "ทุกหมวดหมู่","All": "ทั้งหมด",
     "See the project": "ดูโปรเจกต์", "Browse projects": "สำรวจโปรเจกต์", "Filters": "ตัวกรอง", "Projects": "โปรเจกต์", "Most updates": "อัปเดตมากที่สุด",
     "Name A to Z": "ชื่อ A ถึง Z", "Maker A to Z": "ผู้สร้าง A ถึง Z", "by Hamster Hub, a technology community": "โดย Hamster Hub ชุมชนเทคโนโลยี",
     "Contacts": "ช่องทางติดต่อ", "Phone": "โทรศัพท์", "Animations": "ภาพเคลื่อนไหว",

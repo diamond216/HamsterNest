@@ -117,7 +117,7 @@ window.NestFeed = (function () {
     function chips() {
       const ph = isPhone();
       chipsEl.innerHTML = `<button type="button" class="chip ${ph ? "chip--fbtn" : "chip--filter"}" data-c="filters" aria-expanded="${panel}" aria-controls="fpanel">${ic("filter")}Filters${state.active ? `<span class="cc">${state.active}</span>` : ""}</button>${ph ? "" : '<span class="chip-sep" aria-hidden="true"></span>'}
-        ${["All", ...ROOMS].map((r) => `<button type="button" class="chip" data-room="${r}" aria-pressed="${state.tab === r}">${r === "All" ? (ph ? "All" : "All projects") : r}</button>`).join("")}
+        ${["All", ...ROOMS].map((r) => `<button type="button" class="chip" data-room="${r}" aria-pressed="${state.tab === r}">${r === "All" ? "All categories" : r}</button>`).join("")}
         ${ph || cfg.noRank ? "" : `<span class="chip-sep rk" aria-hidden="true"></span>${tiers.map((t) => `<button type="button" class="chip rk" data-rank="${t.id}" aria-pressed="${state.ranks.has(t.id)}">${rankIcon(t.id)}${t.name}</button>`).join("")}`}`;
     }
     const cnt = (key, test, ignore) => state.count(test, ignore);
