@@ -28,7 +28,7 @@
       document.title = `${pr.full} · Hamster Nest`;
       this.root.innerHTML = `<div class="banner" aria-hidden="true">${window.Art.draw(ws[0].w, 3)}</div>
         <div class="phd">${pic}<div><h1>${esc(pr.full)}</h1><div class="sub">@${esc(p.handle)} · ${ws.length} projects · ${ups.length} dev logs</div><div class="bio">${esc(pr.about)}</div>
-        <div class="acts">${own ? `<a class="btn btn--line" href="${Paths.page("post.html")}">${ic("plus")}Build</a><button type="button" class="btn btn--line" data-act="edit" aria-haspopup="dialog">Edit profile</button>` : ""}${ch.length ? `<button type="button" class="btn btn--line" data-act="contact" aria-haspopup="dialog" aria-expanded="false">${ic("mail")}Contact</button>` : ""}</div></div></div>
+        <div class="acts">${own ? `<a class="btn btn--line" href="${Paths.page("post.html")}">${ic("plus")}Create</a><button type="button" class="btn btn--line" data-act="edit" aria-haspopup="dialog">Edit profile</button>` : ""}${ch.length ? `<button type="button" class="btn btn--line" data-act="contact" aria-haspopup="dialog" aria-expanded="false">${ic("mail")}Contact</button>` : ""}</div></div></div>
         <nav class="tabs" role="tablist" aria-label="${esc(p.name)}'s profile">${tabs.map(([k, l, n]) => `<a role="tab" id="tab-${k}" href="#${p.handle}/${k}" aria-selected="${k === tab}" aria-controls="panel"${k === tab ? "" : ' tabindex="-1"'}>${l}${n === null ? "" : ` <span class="cnt">${n}</span>`}</a>`).join("")}</nav>
         <div id="panel" role="tabpanel" aria-labelledby="tab-${tab}"></div>`;
       this.panel();

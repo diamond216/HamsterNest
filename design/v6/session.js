@@ -64,7 +64,7 @@ window.NestSession = (function () {
     items() {
       const u = Session.user;
       return [
-        ["Your profile", Paths.page(`profile.html#${u.handle}`), "works"], ["Build", Paths.page("post.html")],
+        ["Your profile", Paths.page(`profile.html#${u.handle}`), "works"], ["Create", Paths.page("post.html")],
         ["Favourites", Paths.page(`profile.html#${u.handle}`), "favs"], "hr",
         ...(this.o.extra || []).map(([label, go]) => [label, null, go]),
         ...(this.o.extra && this.o.extra.length ? ["hr"] : []), ["Log out", null, "out"]];
