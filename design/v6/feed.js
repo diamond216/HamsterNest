@@ -12,14 +12,14 @@ window.NestFeed = (function () {
 
   const card = (w, i, opts = {}) => {
     const name = opts.name || w.name, rank = opts.noRank ? "new, not ranked yet" : tierName(w.tier);
-    const flag = opts.noRank ? `<span class="pc__rank">New · not ranked yet</span>` : `<span class="pc__rank">${rankIcon(w.tier)}${tierName(w.tier)}</span>`;
+    const rk = opts.noRank ? "" : `<span class="pc__rk" title="${tierName(w.tier)}">${rankIcon(w.tier, 18)}</span>`;
     const on = Follows.has(w.id);
     const fol = opts.noFollow ? "" : `<button type="button" class="pc__follow" data-follow="${w.id}" aria-pressed="${on}" aria-label="Follow ${esc(name)}">${ic("follow")}<span class="fl">${on ? "Following" : "Follow"}</span></button>`;
     const href = opts.href || Paths.page(`project.html#${w.id}`);
     const did = `pcd-${w.id}-${++seq}`;
     const vtag = w.video ? `<span class="pc__vtag">${ic("play")}Video</span>` : "";
-    return `<div class="pc" data-id="${w.id}"><span class="pc__hl" aria-hidden="true"><span class="sp"></span><span class="pc__more"></span></span><a class="pc__link" href="${href}" aria-describedby="${did}"><span class="pc__pic" aria-hidden="true">${window.Art.draw(w, (opts.frame ?? i) % 7)}${flag}${vtag}</span>
-      <span class="pc__row"><h3 class="pc__name">${esc(name)}<span class="vh">, ${rank}</span></h3><span class="tag">${esc(opts.room || w.room)}</span></span>
+    return `<div class="pc" data-id="${w.id}"><span class="pc__hl" aria-hidden="true"><span class="sp"></span><span class="pc__more"></span></span><a class="pc__link" href="${href}" aria-describedby="${did}"><span class="pc__pic" aria-hidden="true">${window.Art.draw(w, (opts.frame ?? i) % 7)}${vtag}</span>
+      <span class="pc__row"><h3 class="pc__name">${esc(name)}<span class="vh">, ${rank}</span></h3>${rk}<span class="tag">${esc(opts.room || w.room)}</span></span>
       <span class="pc__by">${esc(opts.maker || w.maker)}</span><span class="pc__upd">${esc(opts.upd || `Updated ${w.update.when}`)}</span></a>${fol}<span class="vh" id="${did}">${esc(w.blurb)}</span></div>`;
   };
   let seq = 0;
