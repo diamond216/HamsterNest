@@ -48,12 +48,17 @@ window.NestFeed = (function () {
       vid.setAttribute("disablepictureinpicture", ""); vid.setAttribute("aria-hidden", "true"); vid.src = w.video;
       pic.firstElementChild.after(vid);
       const v = vid;
+      const tick = () => {
+        if (v !== vid) return;
+        const i = $(".pc__prog i", pic); if (i && v.duration) i.style.transform = `scaleX(${Math.min(1, v.currentTime / v.duration)})`;
+        requestAnimationFrame(tick);
+      };
       v.addEventListener("playing", () => {
         if (v !== vid) return;
         v.classList.add("on"); c.classList.add("v-play");
-        if (!$(".pc__prog", pic)) pic.insertAdjacentHTML("beforeend", '<span class="pc__prog"><i></i></span>');
+        if (!$(".pc__prog", pic)) pic.insertAdjacentHTML("beforeend", '<span class="pc__prog" aria-hidden="true"><i></i></span>');
+        tick();
       }, { once: true });
-      v.addEventListener("timeupdate", () => { const i = $(".pc__prog i", pic); if (i && v.duration) i.style.width = `${(v.currentTime / v.duration) * 100}%`; });
       v.play().catch(() => {});
     };
     const open = (c, w) => {

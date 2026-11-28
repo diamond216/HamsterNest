@@ -5,15 +5,16 @@ window.Previews = (function () {
   const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
   class FramePreview {
     constructor(box, work) {
-      this.work = work; this.i = 0; this.timer = 0;
+      this.work = work; this.i = 0; this.timer = 0; this.t = 0;
       this.layer = document.createElement("div"); this.layer.className = "pv"; box.appendChild(this.layer);
     }
     start() {
       if (calm) { Art.fill(this.layer, this.work, 1); this.layer.classList.add("pv--on"); return; }
-      const step = () => { this.i = (this.i % (this.work.frames - 1)) + 1; Art.fill(this.layer, this.work, this.i); this.layer.classList.add("pv--on"); };
+      const step = () => { this.i = (this.i % (this.work.frames - 1)) + 1; this.t = performance.now(); Art.fill(this.layer, this.work, this.i); this.layer.classList.add("pv--on"); };
       step(); this.timer = setInterval(step, 700);
     }
     stop() { clearInterval(this.timer); this.layer.classList.remove("pv--on"); this.i = 0; }
+    progress() { const n = this.work.frames - 1; return n > 0 && this.i ? Math.min(1, (this.i - 1 + Math.min(1, (performance.now() - this.t) / 700)) / n) : 0; }
   }
   class VideoPreview {
     constructor(box, work) {
@@ -22,6 +23,7 @@ window.Previews = (function () {
     }
     start() { this.v.classList.add("pv--on"); return calm ? Promise.resolve(false) : this.v.play().then(() => true, () => false); }
     stop() { this.v.pause(); this.v.classList.remove("pv--on"); }
+    progress() { return this.v.duration ? Math.min(1, this.v.currentTime / this.v.duration) : 0; }
   }
   return { for: (box, work) => (work.video ? new VideoPreview(box, work) : new FramePreview(box, work)) };
 })();

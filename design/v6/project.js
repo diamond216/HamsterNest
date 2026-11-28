@@ -30,7 +30,7 @@
       this.root.innerHTML = `<div class="phead"><div><a class="backl" href="${bh}">${ic("back")}${esc(bl)}</a><span class="pmeta">${esc(w.genre)} / ${w.platforms.map(esc).join(" / ")}</span><div class="wt"><h1>${esc(w.name)}</h1><span class="tag">${esc(w.room)}</span></div><p class="pitch">${esc(w.blurb)}</p></div>
         <div class="owner sumbox"><dl><div><dt>Rank</dt><dd>${rankIcon(w.tier, 18)}${t.name} · #${place} of ${works.length}</dd></div><div><dt>Updated</dt><dd>${esc(w.update.when[0].toUpperCase() + w.update.when.slice(1))}</dd></div><div><dt>Made by</dt><dd>${team.map(([n]) => esc(n)).join(", ")}</dd></div><div><dt>Runs on</dt><dd>${w.platforms.map(esc).join(", ")}</dd></div></dl></div></div>
         <div class="watch"><div>
-          <div class="galw"><div class="gal" role="region" aria-label="Clip and pictures of ${esc(w.name)}" tabindex="0"><span class="gal__art"></span><button type="button" class="gal__play" aria-pressed="false" aria-label="Play the clip of ${esc(w.name)}" style="border:0;cursor:pointer">${ic("play")}</button><button type="button" class="gal__nav" data-go="-1" style="left:12px;border:0;cursor:pointer" aria-label="Previous picture">${ic("back")}</button><button type="button" class="gal__nav" data-go="1" style="right:12px;border:0;cursor:pointer" aria-label="Next picture">${ic("next")}</button><span class="gal__count"></span></div>
+          <div class="galw"><div class="gal" role="region" aria-label="Clip and pictures of ${esc(w.name)}" tabindex="0"><span class="gal__art"></span><button type="button" class="gal__play" aria-pressed="false" aria-label="Play the clip of ${esc(w.name)}" style="border:0;cursor:pointer">${ic("play")}</button><button type="button" class="gal__nav" data-go="-1" style="left:12px;border:0;cursor:pointer" aria-label="Previous picture">${ic("back")}</button><button type="button" class="gal__nav" data-go="1" style="right:12px;border:0;cursor:pointer" aria-label="Next picture">${ic("next")}</button><span class="gal__count"></span><span class="gal__prog" aria-hidden="true" hidden><i></i></span></div>
             <div class="thumbs" role="group" aria-label="Pictures">${slides().map((s, i) => `<button type="button" data-i="${i}" aria-label="${i ? `Picture ${i + 1} of 5` : "Clip, 1 of 5"}"><span>${window.Art.draw({ ...w, scribble: "" }, s.frame)}</span></button>`).join("")}</div></div>
           <div class="desc">${d.description().map((p) => `<p>${esc(p)}</p>`).join("")}</div>
           <section class="ups" id="updates" aria-labelledby="ups-h"><h2 id="ups-h">Updates <span class="cnt">${ups.length}</span></h2><div class="upsbox"${ph ? "" : ' tabindex="0" role="region" aria-label="Updates, newest first"'}><ol>${ups.map(([when, what, note], i) => `<li${ph && i > 2 ? " hidden" : ""}><span>${i ? "" : '<span class="new">new</span>'}<time><span class="dd">${dday(when)}</span>${esc(when)}</time></span><div><b>${esc(what)}</b><p>${esc(note)}</p>${FIG.includes(i) ? `<figure><img src="data:image/svg+xml;charset=utf-8,${encodeURIComponent(window.Art.draw({ ...w, scribble: "" }, i + 1))}" alt="${esc(what)}, image" width="168" height="95"${i ? ' loading="lazy"' : ""} decoding="async" style="display:block;width:100%;height:100%;object-fit:cover"></figure>` : ""}</div></li>`).join("")}</ol></div>${ph && ups.length > 3 ? `<button type="button" class="btn btn--line showall" data-act="allups">Show all ${ups.length} updates</button>` : ""}</section>
@@ -47,9 +47,19 @@
     gallery(w) {
       const gal = $(".gal", this.root), art = $(".gal__art", gal), play = $(".gal__play", gal), thumbs = $$(".thumbs button", this.root), list = slides(), bare = { ...w, scribble: "" };
       const still = document.documentElement.classList.contains("calm") || matchMedia("(prefers-reduced-motion: reduce)").matches;
-      let userPaused = false;
+      let userPaused = false, looping = false;
+      const prog = $(".gal__prog", gal), bar = prog.firstElementChild;
+      const calmNow = () => document.documentElement.classList.contains("calm") || matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const loop = () => {
+        const p = this.preview, on = !!p && p.progress && play.getAttribute("aria-pressed") === "true" && !calmNow();
+        prog.hidden = !on;
+        if (!on) { looping = false; return; }
+        bar.style.transform = `scaleX(${p.progress()})`;
+        requestAnimationFrame(loop);
+      };
       const setPlay = (on) => {
         play.setAttribute("aria-pressed", String(on)); play.setAttribute("aria-label", `${on ? "Pause" : "Play"} the clip of ${w.name}`); play.innerHTML = ic(on ? "pause" : "play");
+        if (on && !looping) { looping = true; requestAnimationFrame(loop); }
         if (!this.preview) return;
         if (!on) return this.preview.stop();
         const p = this.preview, r = p.start();
@@ -57,12 +67,12 @@
       };
       const go = (i) => {
         if (this.preview) { this.preview.stop(); this.preview = null; }
-        $$(".gal > :not(.gal__art):not(.gal__play):not(.gal__nav):not(.gal__count)", this.root).forEach((e) => e.remove());
+        $$(".gal > :not(.gal__art):not(.gal__play):not(.gal__nav):not(.gal__count):not(.gal__prog)", this.root).forEach((e) => e.remove());
         this.at = Math.max(0, Math.min(list.length - 1, i));
         const s = list[this.at];
         art.innerHTML = window.Art.draw(bare, s.frame);
         play.hidden = !s.clip;
-        if (s.clip && window.Previews) { this.preview = window.Previews.for(gal, bare); gal.lastElementChild.className = "gal__clip"; gal.append(play, ...$$(".gal__nav, .gal__count", gal)); setPlay(!still && !userPaused); }
+        if (s.clip && window.Previews) { this.preview = window.Previews.for(gal, bare); gal.lastElementChild.className = "gal__clip"; gal.append(play, ...$$(".gal__nav, .gal__count, .gal__prog", gal)); setPlay(!still && !userPaused); }
         $(".gal__count", gal).textContent = `${this.at + 1} / ${list.length}`;
         thumbs.forEach((t, k) => (k === this.at ? t.setAttribute("aria-current", "true") : t.removeAttribute("aria-current")));
       };
